@@ -22,6 +22,8 @@ etc).
 
 You can GET and PUT to the record for any device.  You can GET from the root
 <userid> component to get a list of all devices.  For the moment, that is all.
+There's not even any "get what has changed" command.  You must get everything,
+all the time.
 
 
 Suggest Future API
