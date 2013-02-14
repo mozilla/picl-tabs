@@ -16,7 +16,7 @@
     "hapi": "0.12.0",
     "awsbox": "0.4.1",
     "convict": "git://github.com/zaach/node-convict.git#disorderly",
-    "picl-server": "git://github.com/mozilla/picl-server.git#kvstore-improvements",
+    "picl-server": "git://github.com/mozilla/picl-server.git",
     "async": "0.1.22"
   },
   "optionalDependencies": {
