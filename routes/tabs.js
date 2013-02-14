@@ -76,6 +76,7 @@ function getDevices(request) {
   var userid = request.params.userid;
   db.getDevices(userid, function(err, res) {
     if (err) return request.reply(Hapi.Error.badRequest(err));
+    if (!res) res = { version: 0, devices: {} };
     request.reply({
       success: true,
       version: res.version,
