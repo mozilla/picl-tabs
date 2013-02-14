@@ -20,14 +20,31 @@ unstructured.  The URL space looks like this:
 (There are some additional URLs for the standard PICL login flow, monitoring,
 etc).
 
-You can GET and PUT to the record for any device.  You can GET from the root
-<userid> component to get a list of all devices.  For the moment, that is all.
-There's not even any "get what has changed" command.  You must get everything,
-all the time.
+You can GET and PUT to the record for any device to store an arbitrary JSON
+blob.  You can GET from the root <userid> component to get a list of all
+devices.  That's about it.
+
+Each user's data has a "version number" that increases whenever something
+is changed.  You can use this for a primitive kind of change-detection.
+Doing a GET to the user's data root gives you a list of devices and the
+version number of their last change, like this:
+
+    > GET /tabs/myuser
+
+    < { "version": 123,
+    <   "devices": {
+    <      "my-desktop-firefox": 120,
+    <      "my-android-firefox": 123
+    < }}
+
+You can then query just those devices that have a version number greater than
+what you last saw.
 
 
 Suggest Future API
 ------------------
+
+(These are just notes at this point, nothing concrete or implemented)
 
 Each user has their own namespace.  Within that is a bucket for each device,
 and within that is a record for each individual tab that is open on that

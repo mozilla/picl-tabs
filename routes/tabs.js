@@ -5,13 +5,29 @@ var db = require('../lib/db.js');
 exports.routes = [
   {
     method: 'GET',
+    path: '/tabs/{userid}',
+    handler: getDevices,
+    config: {
+      description: 'Get all devices for a specific user',
+      response: {
+        schema: {
+          success: Hapi.Types.Boolean().required(),
+          version: Hapi.Types.Number().required(),
+          devices: Hapi.Types.Object().required()
+        }
+      }
+    }
+  },
+  {
+    method: 'GET',
     path: '/tabs/{userid}/{device}',
-    handler: get_tabs,
+    handler: getTabs,
     config: {
       description: 'Get tabs data for a specific device',
       response: {
         schema: {
           success: Hapi.Types.Boolean().required(),
+          version: Hapi.Types.Number().required(),
           // XXX TODO: get this working with Object() type
           tabs: Hapi.Types.String().required()
         }
@@ -21,7 +37,7 @@ exports.routes = [
   {
     method: 'PUT',
     path: '/tabs/{userid}/{device}',
-    handler: put_tabs,
+    handler: putTabs,
     config: {
       description: 'Put tabs data for a specific device',
       validate: {
@@ -32,7 +48,8 @@ exports.routes = [
       },
       response: {
         schema: {
-          success: Hapi.Types.Boolean().required()
+          success: Hapi.Types.Boolean().required(),
+          version: Hapi.Types.Number().required()
         }
       }
     }
@@ -40,12 +57,13 @@ exports.routes = [
   {
     method: 'DELETE',
     path: '/tabs/{userid}/{device}',
-    handler: delete_tabs,
+    handler: delTabs,
     config: {
       description: 'Delete tabs data for a specific device',
       response: {
         schema: {
-          success: Hapi.Types.Boolean().required()
+          success: Hapi.Types.Boolean().required(),
+          version: Hapi.Types.Number().required()
         }
       }
     }
@@ -53,42 +71,60 @@ exports.routes = [
 ];
 
 
-function get_tabs(request) {
+function getDevices(request) {
   // XXX TODO: auth checking!
-  var params = request.params;
-  db.get_tabs(params.userid, params.device, function(err, data) {
-    if (err) {
-      request.reply(Hapi.Error.badRequest(err));
-    } else if (!data) {
-      request.reply(Hapi.Error.notFound());
-    } else {
-      request.reply({success: true, tabs: data});
-    }
+  var userid = request.params.userid;
+  db.getDevices(userid, function(err, res) {
+    if (err) return request.reply(Hapi.Error.badRequest(err));
+    request.reply({
+      success: true,
+      version: res.version,
+      devices: res.devices
+    });
   });
 };
 
 
-function put_tabs(request) {
+function getTabs(request) {
   // XXX TODO: auth checking!
-  var params = request.params, payload = request.payload;
-  db.set_tabs(params.userid, params.device, payload.tabs, function(err) {
-    if (err) {
-      request.reply(Hapi.Error.badRequest(err));
-    } else {
-      request.reply({success: true});
-    }
+  var userid = request.params.userid;
+  var device = request.params.device
+  db.getTabs(userid, device, function(err, res) {
+    if (err) return request.reply(Hapi.Error.badRequest(err));
+    if (!res) return request.reply(Hapi.Error.notFound());
+    request.reply({
+      success: true,
+      version: res.version,
+      tabs: res.tabs
+    });
   });
 };
 
 
-function delete_tabs(request) {
+function putTabs(request) {
   // XXX TODO: auth checking!
-  var params = request.params;
-  db.del_tabs(params.userid, params.device, function(err) {
-    if (err) {
-      request.reply(Hapi.Error.badRequest(err));
-    } else {
-      request.reply({success: true});
-    }
+  var userid = request.params.userid;
+  var device = request.params.device
+  var tabs = request.payload.tabs;
+  db.setTabs(userid, device, tabs, function(err, res) {
+    if (err) return request.reply(Hapi.Error.badRequest(err));
+    request.reply({
+      success: true,
+      version: res.version
+    });
+  });
+};
+
+
+function delTabs(request) {
+  // XXX TODO: auth checking!
+  var userid = request.params.userid;
+  var device = request.params.device
+  db.delTabs(userid, device, function(err, res) {
+    if (err) return request.reply(Hapi.Error.badRequest(err));
+    request.reply({
+      success: true,
+      version: res.version
+    });
   });
 };

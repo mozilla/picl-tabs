@@ -10,6 +10,8 @@ var TEST_AUDIENCE = config.get('public_url');
 var TEST_EMAIL;
 var TEST_ASSERTION;
 var TEST_TOKEN = 'foobar';
+var TEST_DEVICE_1 = 'firefox-1';
+var TEST_DEVICE_2 = 'firefox-2';
 
 
 describe('set up account', function() {
@@ -39,34 +41,85 @@ describe('set up account', function() {
 
 
 describe('tab storage api', function() {
+ 
+  var makeURL = function(userid, device) {
+    var components = ['', 'tabs'];
+    if (userid) components.push(encodeURIComponent(userid));
+    if (device) components.push(encodeURIComponent(device));
+    return components.join('/');
+  }
+
   it('should store a tab data record', function(done) {
-    makeRequest('PUT', '/tabs/USERID_NEEDS_CHECKING/firefox-1', {
+    makeRequest('PUT', makeURL(TEST_EMAIL, TEST_DEVICE_1), {
       payload: { tabs: 'MY AWESOME TABS' },
       headers: { Authorization: TEST_TOKEN }
     }, function(res) {
       assert.equal(res.statusCode, 200);
-      assert.deepEqual(res.result, { success: true });
+      assert.ok(res.result.success);
       done();
     });
   });
 
   it('should retrieve a previously-stored record', function(done) {
-    makeRequest('GET', '/tabs/USERID_NEEDS_CHECKING/firefox-1', {
+    makeRequest('GET', makeURL(TEST_EMAIL, TEST_DEVICE_1), {
       headers: { Authorization: TEST_TOKEN }
     }, function(res) {
       assert.equal(res.statusCode, 200);
-      assert.deepEqual(res.result, { success: true, tabs: 'MY AWESOME TABS'});
+      assert.ok(res.result.success);
+      assert.equal(res.result.tabs, 'MY AWESOME TABS');
       done();
     });
   });
 
   it('should fail on bad Authorization header', function(done) {
-    makeRequest('GET', '/tabs/USERID_NEEDS_CHECKING/firefox-1', {
+    makeRequest('GET', makeURL(TEST_EMAIL, TEST_DEVICE_1), {
       headers: { Authorization: 'bad' }
     }, function(res) {
       assert.equal(res.statusCode, 401);
       done();
     });
   });
-});
 
+  it('should store data for multiple devices', function(done) {
+    makeRequest('PUT', makeURL(TEST_EMAIL, TEST_DEVICE_2), {
+      payload: { tabs: 'MY AMAZING TABS' },
+      headers: { Authorization: TEST_TOKEN }
+    }, function(res) {
+      assert.equal(res.statusCode, 200);
+      assert.ok(res.result.success);
+      done();
+    });
+  });
+
+  it('without clobbering each other\'s data', function(done) {
+    makeRequest('GET', makeURL(TEST_EMAIL, TEST_DEVICE_1), {
+      headers: { Authorization: TEST_TOKEN }
+    }, function(res) {
+      assert.equal(res.statusCode, 200);
+      assert.ok(res.result.success);
+      assert.equal(res.result.tabs, 'MY AWESOME TABS');
+      makeRequest('GET', makeURL(TEST_EMAIL, TEST_DEVICE_2), {
+        headers: { Authorization: TEST_TOKEN }
+      }, function(res) {
+        assert.equal(res.statusCode, 200);
+        assert.ok(res.result.success);
+        assert.equal(res.result.tabs, 'MY AMAZING TABS');
+        done();
+      });
+    });
+  });
+
+  it('should list all devices that have data stored', function(done) {
+    makeRequest('GET', makeURL(TEST_EMAIL), {
+      headers: { Authorization: TEST_TOKEN }
+    }, function(res) {
+      assert.equal(res.statusCode, 200);
+      assert.ok(res.result.success);
+      assert.ok(res.result.version);
+      var devices = res.result.devices;
+      assert.deepEqual(Object.keys(devices), [TEST_DEVICE_1, TEST_DEVICE_2]);
+      assert.ok(devices[TEST_DEVICE_1] < devices[TEST_DEVICE_2]);
+      done();
+    });
+  });
+});
