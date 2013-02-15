@@ -12,9 +12,7 @@
   "predef": [
     "exports", 
     "require",
-    "process",
-    "describe",
-    "it"
+    "process"
   ],
   "es5": true,
   "esnext": true,
