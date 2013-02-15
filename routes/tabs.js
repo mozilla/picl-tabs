@@ -1,5 +1,4 @@
 var Hapi = require('hapi');
-var config = require('picl-server/lib/config.js');
 var db = require('../lib/db.js');
 
 exports.routes = [
@@ -83,13 +82,13 @@ function getDevices(request) {
       devices: res.devices
     });
   });
-};
+}
 
 
 function getTabs(request) {
   // XXX TODO: auth checking!
   var userid = request.params.userid;
-  var device = request.params.device
+  var device = request.params.device;
   db.getTabs(userid, device, function(err, res) {
     if (err) return request.reply(Hapi.Error.badRequest(err));
     if (!res) return request.reply(Hapi.Error.notFound());
@@ -99,13 +98,13 @@ function getTabs(request) {
       tabs: res.tabs
     });
   });
-};
+}
 
 
 function putTabs(request) {
   // XXX TODO: auth checking!
   var userid = request.params.userid;
-  var device = request.params.device
+  var device = request.params.device;
   var tabs = request.payload.tabs;
   db.setTabs(userid, device, tabs, function(err, res) {
     if (err) return request.reply(Hapi.Error.badRequest(err));
@@ -114,13 +113,13 @@ function putTabs(request) {
       version: res.version
     });
   });
-};
+}
 
 
 function delTabs(request) {
   // XXX TODO: auth checking!
   var userid = request.params.userid;
-  var device = request.params.device
+  var device = request.params.device;
   db.delTabs(userid, device, function(err, res) {
     if (err) return request.reply(Hapi.Error.badRequest(err));
     request.reply({
@@ -128,4 +127,4 @@ function delTabs(request) {
       version: res.version
     });
   });
-};
+}

@@ -47,7 +47,7 @@ describe('tab storage api', function() {
     if (userid) components.push(encodeURIComponent(userid));
     if (device) components.push(encodeURIComponent(device));
     return components.join('/');
-  }
+  };
 
   it('should store a tab data record', function(done) {
     makeRequest('PUT', makeURL(TEST_EMAIL, TEST_DEVICE_1), {

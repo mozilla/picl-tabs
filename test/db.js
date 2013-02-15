@@ -64,6 +64,7 @@ describe('picl-tabs db layer', function () {
         db.setTabs('test@example.com', 'firefox-1', dataIn, cb);
       },
       function(res, cb) {
+        assert.ok(res.version);
         db.getDevices('test@example.com', function(err, meta) {
           if (err) return cb(err);
           assert.deepEqual(Object.keys(meta.devices),
@@ -78,7 +79,9 @@ describe('picl-tabs db layer', function () {
       function(cb) {
         db.delTabs('test@example.com', 'firefox-1', function(err, res) {
           if (err) return cb(err);
+          assert.ok(res.version);
           db.delTabs('test@example.com', 'firefox-1', function(err, res) {
+            assert.ok(res.version);
             cb(null);
           });
         });
